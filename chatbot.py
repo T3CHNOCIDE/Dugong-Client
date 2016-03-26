@@ -249,12 +249,12 @@ class ChatBot(dugong.Dugong):
 			ban_date = datetime.utcnow().strftime("%d %B %Y")			
 			ban_template = "==Chat Ban: %s==\n{{Chat ban|user=%s|mod=%s|reason=%s|length=%s|date=%s}}\n" % (ban_date, banneduser, moderator, reason, time, ban_date)
 			
-			talk_contents = wikiaapi.edit(talk_page)
+			talk_contents = wikiaapi.view(talk_page)
 			if not talk_contents:
 				talk_contents = ""
 			talk_contents += ban_template
 
-			wikiaapi.save(talk_page, talk_contents,summary='Automatically adding chat ban information.')
+			wikiaapi.edit(talk_page, talk_contents,summary='Automatically adding chat ban information.')
 			
 	def log_thread(self):
 		"""
@@ -285,7 +285,7 @@ class ChatBot(dugong.Dugong):
 			
 			#Gets current log from wiki and extends with temporary log file
 			#If log doesn't exist, creates new page
-			page_text = wikiaapi.edit(log_title)
+			page_text = wikiaapi.view(log_title)
 			if page_text:
 				page_text = page_text[5:][:-33]
 				page_text += log_data
@@ -294,7 +294,7 @@ class ChatBot(dugong.Dugong):
 				page_text = "<pre>%s</pre>[[Category:Chat_logs/%s]]" % (log_data, datetime.utcnow().strftime("%Y"))
 			
 			#Saves log to wiki and protects page
-			wikiaapi.save(log_title, page_text,summary='Automated chat log update.')
+			wikiaapi.edit(log_title, page_text,summary='Automated chat log update.')
 			wikiaapi.protect(log_title, reason="Automatically protecting chat log.")
 			
 			#Saves last log time for !status command
@@ -329,7 +329,7 @@ class ChatBot(dugong.Dugong):
 		
 		#Gets current log from wiki and extends with temporary log file
 		#If log doesn't exist, creates new page
-		page_text = wikiaapi.edit(log_title)
+		page_text = wikiaapi.view(log_title)
 		if page_text:
 			page_text = page_text[5:][:-33]
 			page_text += log_data
@@ -338,7 +338,7 @@ class ChatBot(dugong.Dugong):
 			page_text = "<pre>%s</pre>[[Category:Chat_logs/%s]]" % (log_data, datetime.utcnow().strftime("%Y"))
 		
 		#Saves log to wiki and protects page
-		wikiaapi.save(log_title, page_text,summary='Admin/moderator forced chat log update.')
+		wikiaapi.edit(log_title, page_text,summary='Admin/moderator forced chat log update.')
 		wikiaapi.protect(log_title, reason="Automatically protecting chat log.")
 		
 		#Saves last log time for !status command
