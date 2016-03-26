@@ -5,7 +5,7 @@ How to run
 ======
 To run this chat bot simply edit the settings.json file using any text editor and fill in the wikia site, username and password.
 
-    {"site":"community","username":"WikiaUser", "password":"Password123"}
+    {"site":"community", "username":"WikiaUser", "password":"Password123"}
 
 Then run chatbot.py from the command line. 
 
@@ -18,11 +18,11 @@ This chat bot already has chat logging capabilities included. Logs are updated e
 
 The chat bot also contains basic commands which can be run from the chat.
 
-Admins commands
+Admin commands
 - !exit - Forces chat bot to leave chat
 - !reboot - Forces program to restart
 
-Mod commans
+Mod commands
 - !kick - Kicks specified user from the chat
 - !ban - Bans specified user from the chat
 - !unban - Unbans specified user from the chat
