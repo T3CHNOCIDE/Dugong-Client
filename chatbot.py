@@ -349,7 +349,7 @@ if __name__ == "__main__":
 	#Checks if settings file, aborts if not set
 	if os.path.exists("settings.json"):
 		#Fetches user information from settings file
-		with open('data.json') as settings_file:    
+		with open('settings.json') as settings_file:    
 			local_settings = json.load(settings_file)
 		#Logs into wiki for log writing then initiates chat bot client
 		wikiaapi.login(local_settings["site"], local_settings["username"], local_settings["password"])
