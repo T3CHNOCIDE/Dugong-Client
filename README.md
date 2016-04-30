@@ -1,5 +1,6 @@
 # Dugong-Client
 Python framework for connecting to the Wikia chat server.
+Version: 1.1.0
 
 How to run
 ======
@@ -28,3 +29,10 @@ Mod commands
 - !unban - Unbans specified user from the chat
 - !status - Returns basic chat bot running information
 - !update - Forces chat log update prior to end of hour
+
+Credits
+======
+This chat bot design has been heavily influenced by Hairr's Python chatbot (deprecated) and Sactage's Ruby chatbot. Please do take a look at their fantastic work:
+
+Hairr's chatbot: http://community.wikia.com/wiki/User:Hairr/Chatbot
+Sactage's chatbot: https://github.com/sactage/chatbot-rb
