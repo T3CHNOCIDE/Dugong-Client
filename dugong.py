@@ -9,33 +9,33 @@
                 /_____/ \____/ \__, / \____//_/ /_/ \__, /  				
                  -.. ..- --.  /____/   --- -. --.  /____/   				
 																			
-                             Dugong Chat Client
-                                   v1.0.0
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-						Copyright (C) 2014 T3CHNOCIDE
-			  <http://community.wikia.com/wiki/User:T3CHNOCIDE>
-
-	This chat module was inspired by Hairr's chat bot client. Using the
-	prefered requests module and with a simplified object architecture
-	for ease of use by new Python programmers. Chat bot client improved
-	using Sactage's chat bot client (written in Ruby).
-	
-	Hairr's chatbot <http://community.wikia.com/wiki/User:Hairr/Chatbot>
-	Sactage's chatbot <https://github.com/sactage/chatbot-rb>
-	
+                             Dugong Chat Client								
+                                   v1.1.0									
+																			
+    This program is free software: you can redistribute it and/or modify	
+    it under the terms of the GNU General Public License as published by	
+    the Free Software Foundation, either version 3 of the License, or		
+    (at your option) any later version.										
+																			
+    This program is distributed in the hope that it will be useful,			
+    but WITHOUT ANY WARRANTY; without even the implied warranty of			
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the			
+    GNU General Public License for more details.							
+																			
+    You should have received a copy of the GNU General Public License		
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.	
+																			
+						Copyright (C) 2014 T3CHNOCIDE						
+			  <http://community.wikia.com/wiki/User:T3CHNOCIDE>				
+																			
+	This chat module was inspired by Hairr's chat bot client. Using the		
+	prefered requests module and with a simplified object architecture		
+	for ease of use by new Python programmers. Recent updates borrowed from
+	Sactage's Ruby chatbot because I'm not in the dev loop!
+																			
+	Hairr's chatbot <http://community.wikia.com/wiki/User:Hairr/Chatbot>	
+	Sactage's chatbot <https://github.com/sactage/chatbot-rb>	
+																			
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 import re
@@ -53,7 +53,6 @@ global session
 session = requests.session()
 
 class Dugong(object):
-
 	def __init__(self, site, username, password):
 		"""
 		Runs chatbot client from class.
@@ -98,7 +97,7 @@ class Dugong(object):
 		response = session.post(wikia_site, data=login_data)
 		content = json.loads(response.text)
 		
-		#Aborts program if there is an unsuccessful login
+		#Aborts program if there is an successful login
 		if content['login']['result'] != 'Success':
 			raise Exception("Login error: Could not log in via MediaWiki API.")
 			
@@ -146,7 +145,7 @@ class Dugong(object):
 		"""
 
 		#Reboots program using os and sys modules
-		#Probably not the cleanest method...
+		#Probably not a clean method...
 		python = sys.executable
 		os.execl(python, python, * sys.argv)
 
@@ -183,7 +182,7 @@ class Dugong(object):
 		#Saves as global variable for later editing
 		global chat_headers
 		chat_headers = {
-			"User-Agent" : "Dugong chat client v1.0.0",
+			"User-Agent" : "Dugong chat client v1.1.0",
 			"Content-Type" : "application/octet-stream",
 			"Accept" : "*/*",
 			"Pragma" : "no-cache",
@@ -192,16 +191,27 @@ class Dugong(object):
 		
 		chat_init_data = { "controller" : "Chat", "format" : "json" }
 		
-		#Performs GET request to Wikia chat servers to find and save
-		#current chat server IDs and login tokens
+		#Performs GET request to Wikia chat servers to find and saves
+		#current chat server and login tokens
 		json_response = session.get(chat_site, params=chat_init_data, headers=chat_headers)
 		json_content = json.loads(json_response.text)
 		
+		with open("temp_json.txt", "w") as temp_file:
+			json.dump(json_content, temp_file, indent=5)
+		
 		chat_key = json_content["chatkey"]
 		chat_room = json_content["roomId"]
-		chat_server = json_content["nodeInstance"]
-		chat_host = json_content['nodeHostname']
-		chat_mod = json_content["isChatMod"]
+		chat_host = json_content['chatServerHost']
+		chat_port = json_content['chatServerPort'] #Not needed unless a developer
+		chat_mod = json_content["isModerator"]
+		
+		#Performs GET request to Wikia API to find and save
+		#cityId (wiki ID) as authentication now requires this
+		chat_id_data = { "action" : "query", "meta" : "siteinfo", "siprop" : "wikidesc", "format" : "json" }
+		json_response = session.get(wikia_site, params=chat_id_data, headers=chat_headers)
+		json_content = json.loads(json_response.text)
+		
+		chat_server = json_content["query"]["wikidesc"]["id"]
 		
 		#Sets chat server headers
 		#Saves as global variable for later editing
@@ -212,16 +222,17 @@ class Dugong(object):
 			"transport" : "polling",
 			"key" : str(chat_key),
 			"roomId" : str(chat_room),
-			"serverId" : str(chat_server)
+			"serverId" : str(chat_server),
+			"wikiId" : str(chat_server)
 		}
 		
 		#Sets chat room URL based on earlier server information
 		global chat_room_url
-		chat_room_url = 'http://%s/socket.io/1/' % chat_host
+		chat_room_url = "http://%s/socket.io/" % (chat_host)
 		
 		#Performs second GET request to get session ID for regular server 
 		#communication and adds data to chat server headers
-		json_response = session.get(chat_room_url, params=chat_room_data)
+		json_response = session.get(chat_room_url, params=chat_room_data, headers=chat_headers)
 		json_content = json.loads(json_response.text[5:])
 		
 		chat_room_data["sid"] = json_content["sid"]
@@ -293,15 +304,15 @@ class Dugong(object):
 	def ban(self, username, length=7200, reason="Misbehaving in chat"):
 		"""
 		Bans specified user from chat
-		Uses 2 hour ban and misbehhaving in chat as default length and reason
+		Uses 2 hour ban and misbehhaving in chat as default length and reasons
 		"""
 		
 		self.post({'msgType' : 'command', 'command' : 'ban', 'userToBan' : username, 'time' : length, 'reason' : reason})
 		
 	def unban(self, username):
 		"""
-		Unbans specified user from chat
-		Uses undoing previous ban as default reason
+		Bans specified user from chat
+		Uses 2 hour ban and misbehhaving in chat as default length and reasons
 		"""
 		
 		self.post({'msgType' : 'command', 'command' : 'ban', 'userToBan' : username, 'time' : 0, 'reason' : 'Undoing previous ban.'})
@@ -336,7 +347,7 @@ class Dugong(object):
 			self.on_logout(chat_data["attrs"]["name"])
 		elif content["event"] == "join":
 			chat_data = json.loads(content["data"])
-			if chat_data["attrs"]["isCanGiveChatMod"]:
+			if chat_data["attrs"]["canPromoteModerator"]:
 				self.on_join(chat_data["attrs"]["name"], "admin")
 			elif chat_data["attrs"]["isModerator"]:
 				self.on_join(chat_data["attrs"]["name"], "moderator")
@@ -368,7 +379,7 @@ class Dugong(object):
 			#Sets time frame of chat in UNIX time and saves to header
 			unix = time.time()
 			__timestamp__ = str(int(round(unix, 0)))
-			chat_room_data['t'] = "%s-%s" % (__timestamp__, 0)
+			chat_room_data['t'] = "{}-{}".format(__timestamp__, 0)
 			
 			#Requests new data from the chat
 			json_response = session.get(chat_room_url, params=chat_room_data).content
@@ -382,8 +393,9 @@ class Dugong(object):
 					
 				except:
 					#If the bot fails to join the chat, exits program
+					print json_response
 					print "Failed connect to chat."
-					sys.exit()
+					#sys.exit()
 
 			elif "\xff42[" in json_response:
 				match = re.findall('\x00.*\xff42\[.*?,(.*)\]', json_response)
