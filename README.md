@@ -10,7 +10,7 @@ To run this chat bot simply edit the settings.json file using any text editor an
 
 Then run chatbot.py from the command line. 
 
-Please note that the requests and json libraries must be installed prior to use. 
+Please note that the `requests` and `json` libraries must be installed prior to use. 
 See PIP for more details: https://pip.pypa.io/en/stable/installing/
 
 Features
