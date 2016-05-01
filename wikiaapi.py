@@ -33,7 +33,6 @@
 import sys
 import json
 import requests
-import wikiaapi
 
 def login(site, username, password):
 	"""
